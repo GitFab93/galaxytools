@@ -6,12 +6,32 @@
     <expand macro='requirements' />
     <command detect_errors="exit_code"><![CDATA[
         mkdir -p './outputdir' &&
-        ./$fcsadaptor --fasta-input $fasta --output-dir './outputdir' --prok
-        && tar -zcf ./outputdir.tgz './outputdir'
+        #if $mode_conditional.selector == "Adaptor"
+            ./$mode_conditional.fcsadaptor --fasta-input $mode_conditional.fasta --output-dir './outputdir' --prok
+            && tar -zcf ./outputdir.tgz './outputdir'
+        #end if
+
+        #if $mode_conditional.selector == "GX"
+            python3 ./$mode_conditional.fcsgx --fasta $mode_conditional.fasta --out-dir './outputdir' --gx-db "${SHM_LOC}/gxdb/all" --split-fasta --tax-id $mode_conditional.fasta
+            && tar -zcf ./outputdir.tgz './outputdir'
+        #end if
 ]]></command>
     <inputs>
-        <param name="fcsadaptor" type="data" label="Run_FCS_adaptor_script" help=""/>
-        <param name="fasta" type="data" format="fasta" label="FASTA File" help=""/>
+        <conditional name="mode_conditional">
+            <param name="selector" type="select" label="Select mode" help="Select a fcs-genome module">
+                <option value="adaptor">FCS-Adaptor</option>
+                <option value="GX">FCS-GX</option>
+            </param>
+            <when value="adaptor">
+                <param name="fcsadaptor" type="data" format="sh" label="Run_FCS_adaptor_script" help=""/>
+                <param argument="--fasta-input" type="data" format="fasta" label="FASTA File" help=""/>
+            </when>
+            <when value="GX">
+                <param name="fcsgx" type="file" label="Run_FCS_gx_script" help=""/>
+                <param argument="--tax-id" type="integer" label="TaxID" help=""/>
+                <param argument="--fasta" type="data" format="fasta" label="FASTA File" help=""/>
+            </when>
+        </conditional>
     </inputs>
     <outputs>
         <data name="test" format="txt"/>
