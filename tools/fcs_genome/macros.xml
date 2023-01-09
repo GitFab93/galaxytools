@@ -1,0 +1,14 @@
+<macros>
+    <token name="@TOOL_VERSION@">latest</token>
+    <token name="@VERSION_SUFFIX@">0</token>
+    
+    <xml name="requirements">
+        <requirements>
+            <container type="docker">ncbi/cgr-fcs-genome</container>
+        </requirements>
+    </xml>
+    <xml name="citations">
+        <citations>
+        </citations>
+    </xml>
+</macros>
