@@ -7,7 +7,13 @@
     <command detect_errors="exit_code"><![CDATA[
         mkdir -p './outputdir' &&
         #if $mode_conditional.selector == "Adaptor"
-            ./$mode_conditional.fcsadaptor --fasta-input $mode_conditional.fasta --output-dir './outputdir' --prok
+            '$__tool_directory__/run_fcsadaptor.sh' --fasta-input $mode_conditional.fasta --output-dir './outputdir'
+            #if $mode_conditional.selector1 == "Eukaryote"
+                --euk
+            #end if
+            #if $mode_conditional.selector1 == "Prokaryote"
+                --prok
+            #end if
             && tar -zcf ./outputdir.tgz './outputdir'
         #end if
 
@@ -23,8 +29,11 @@
                 <option value="GX">FCS-GX</option>
             </param>
             <when value="adaptor">
-                <param name="fcsadaptor" type="data" format="sh" label="Run_FCS_adaptor_script" help=""/>
-                <param argument="--fasta-input" type="data" format="fasta" label="FASTA File" help=""/>
+            <param argument="--fasta-input" type="data" format="fasta" label="FASTA File" help=""/>
+                <param name="selector1" type="select" label="Choose if Eukaryote or Prokaryote">
+                    <option value="Eukaryote">Eukaryote</option>
+                    <option value="Prokayote">Prokaryote</option>
+                </param>
             </when>
             <when value="GX">
                 <param name="fcsgx" type="file" label="Run_FCS_gx_script" help=""/>
@@ -34,8 +43,34 @@
         </conditional>
     </inputs>
     <outputs>
-        <data name="test" format="txt"/>
-        <data name="outputdir" format="tgz" from_work_dir="./outputdir.tgz" label="${tool.name} on ${on_string}"/>
+        <data name="av_screen" format="log" from_work_dir="./outputdir" label="${tool.name} on ${on_string}: outputdir">
+            <filter>mode_conditional['selector'] == 'Adaptor'</filter>
+        </data>
+        <data name="cleaned_sequences/fcsadaptor_prok_test" format="fa.gz" from_work_dir="./outputdir" label="${tool.name} on ${on_string}: outputdir">
+            <filter>mode_conditional['selector'] == 'Adaptor'</filter>
+        </data>
+        <data name="combined.calls" format="jsonl" from_work_dir="./outputdir" label="${tool.name} on ${on_string}: outputdir">
+            <filter>mode_conditional['selector'] == 'Adaptor'</filter>
+        </data>
+        <data name="fcs" format="log" from_work_dir="./outputdir" label="${tool.name} on ${on_string}: outputdir">
+            <filter>mode_conditional['selector'] == 'Adaptor'</filter>
+        </data>
+        <data name="fcs_adaptor_report" format="txt" from_work_dir="./outputdir" label="${tool.name} on ${on_string}: outputdir">
+            <filter>mode_conditional['selector'] == 'Adaptor'</filter>
+        </data>
+        <data name="logs" format="jsonl" from_work_dir="./outputdir" label="${tool.name} on ${on_string}: outputdir">
+            <filter>mode_conditional['selector'] == 'Adaptor'</filter>
+        </data>
+        <data name="pipeline_args" format="yaml" from_work_dir="./outputdir" label="${tool.name} on ${on_string}: outputdir">
+            <filter>mode_conditional['selector'] == 'Adaptor'</filter>
+        </data>
+        <data name="skipped_trims" format="jsonl" from_work_dir="./outputdir" label="${tool.name} on ${on_string}: outputdir">
+            <filter>mode_conditional['selector'] == 'Adaptor'</filter>
+        </data>
+        <data name="validate_fasta" format="txt" from_work_dir="./outputdir" label="${tool.name} on ${on_string}: outputdir">
+            <filter>mode_conditional['selector'] == 'Adaptor'</filter>
+        </data>
+        <data name="outputdir" format="tgz" from_work_dir="./outputdir.tgz" label="${tool.name} on ${on_string}: outputdir.tgz"/>
     </outputs>
     <tests>
         <test>
